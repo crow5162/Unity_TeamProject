@@ -28,6 +28,10 @@ public class Enemy : MonoBehaviour
 
     //코루틴 사용할 때 지연시간을 사용할 변수 
     private WaitForSeconds cTime;
+    //이동을 제어하는 EnemyMove 클래스를 저장할 변수 
+    private Enemymove enemymove;
+
+
 
     //한번만 호출되는 함수 
     void Awake()
@@ -41,7 +45,8 @@ public class Enemy : MonoBehaviour
         }
         //적 캐릭터의 Transform 컴포넌트 추출
         EnemyTr = GetComponent<Transform>();
-
+        //이동을 제어하는 enemyMove 클래스 추출 
+        enemymove = GetComponent<Enemymove>();
         cTime = new WaitForSeconds(0.3f);
     }
 
@@ -50,7 +55,8 @@ public class Enemy : MonoBehaviour
     {
         //CheckState코루틴 함수 실행
         StartCoroutine(CheckState());
-
+        //Action 코루틴 함수를 실행
+        StartCoroutine(Action());
     }
     // 에너미의 상태를 검사하는 코루틴함수 .
     IEnumerator CheckState()
@@ -83,6 +89,27 @@ public class Enemy : MonoBehaviour
             // 코루틴 함수는 0.3초 간격으로 확인을 하기 때문에 
             yield return cTime;
 
+        }
+    }
+
+    IEnumerator Action()
+    {
+        // 적 캐릭터가 죽을 때 까지 무한 루프 스타트
+        while (!IsDie)
+        {
+            yield return cTime;
+
+            switch (EnemyState)
+            {
+                case CurrentState.Idle:
+                    break;
+                case CurrentState.Trace:
+                    break;
+                case CurrentState.Attack:
+                    break;
+                case CurrentState.Die:
+                    break;
+            }
         }
     }
 
