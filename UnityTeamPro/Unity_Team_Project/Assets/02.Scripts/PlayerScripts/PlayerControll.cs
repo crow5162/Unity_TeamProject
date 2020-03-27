@@ -15,7 +15,7 @@ public class PlayerControll : MonoBehaviour
     public float speedSmoothTime = 0.1f;
 
     float turnSmoothVelocity;
-    float speedSmoothVelocity;
+    float speedSmoothVelocity; 
 
     float currentSpeed;
 
@@ -23,6 +23,7 @@ public class PlayerControll : MonoBehaviour
 
     private Animator anim;
     private Transform playerTr;
+    private CameraControll cControll;
 
     private readonly int hashMoving = Animator.StringToHash("isMove");
     private readonly int hashAiming = Animator.StringToHash("isAiming");
@@ -31,6 +32,7 @@ public class PlayerControll : MonoBehaviour
 
     [Header("Aiming Target")]
     private bool isAiming = false;  //조준모드
+    private Transform followTr;
 
     // Start is called before the first frame update
     void Start()
@@ -38,6 +40,9 @@ public class PlayerControll : MonoBehaviour
         cameraTr = Camera.main.transform;
         anim = GetComponent<Animator>();
         playerTr = GetComponent<Transform>();
+
+        cControll = GameObject.Find("Main Camera").GetComponent<CameraControll>();
+        followTr = transform.Find("CameraFollow").GetComponent<Transform>();
     }
 
     // Update is called once per frame
@@ -79,10 +84,15 @@ public class PlayerControll : MonoBehaviour
         if(Input.GetMouseButton(1))
         {
             isAiming = true;
+            cControll._isZoomed = true;
+
+            //Vector3.Lerp(transform.Find("CameraFollow").position, transform.Find("CameraFollow(Zoom)").position, 2.0f);
         }
         else if (Input.GetMouseButtonUp(1))
         {
             isAiming = false;
+            cControll._isZoomed = false;
+
         }
 
         Aiming(); 
@@ -101,6 +111,14 @@ public class PlayerControll : MonoBehaviour
 
             float targetRotation = cameraTr.eulerAngles.y;
             transform.eulerAngles = Vector2.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
+
+            followTr.position = Vector3.Lerp(followTr.position,
+               transform.Find("CameraFollow(Zoom)").position, 0.05f);
+        }
+        else if(!isAiming)
+        {
+            followTr.position = Vector3.Lerp(followTr.position,
+              transform.Find("CameraFollow(noZoom)").position, 0.05f);
         }
 
         anim.SetBool(hashAiming, isAiming);
