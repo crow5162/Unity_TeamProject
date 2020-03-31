@@ -6,10 +6,10 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     //사용하는 컴포넌트 선언 
-    Rigidbody rigidbody;
-    Animator animator;
+    //private Rigidbody rigidbody;
+    private Animator animator;
     //몬스터의 상태 정의 
-    public enum CurrentState {  Idle, Trace, Attack, Die}
+    public enum CurrentState {  Idle, Trace, Attack, Die }
     //몬스터 처음 상태 
     public CurrentState EnemyState = CurrentState.Idle;
     //플레이어 위치 저장
@@ -19,15 +19,24 @@ public class Enemy : MonoBehaviour
     private Transform EnemyTr;
 
     //공격 사정 거리 
-    public float AttackRange = 7.0f;
+    public float AttackRange = 10.0f;
     //추적 사정 거리 
-    public float TraceRange = 15.0f;
+    public float TraceRange = 20.0f;
 
     // 사망 여부를 판단
     public bool IsDie = false;
 
     //코루틴 사용할 때 지연시간을 사용할 변수 
     private WaitForSeconds cTime;
+    //이동을 제어하는 EnemyMove 클래스를 저장할 변수 
+    private Enemymove enemymove;
+    //총알 발사를 제어하는 EnemyFire 클래스를 저장할 변수 
+    private EnemyFire enemyFire;
+
+
+    //애니메이터 컨트롤러에 정의한 파라미터의 해시값을 미리 추출
+    private readonly int hashMove = Animator.StringToHash("IsMove");
+    private readonly int hashSpeed = Animator.StringToHash("Speed");
 
     //한번만 호출되는 함수 
     void Awake()
@@ -41,6 +50,12 @@ public class Enemy : MonoBehaviour
         }
         //적 캐릭터의 Transform 컴포넌트 추출
         EnemyTr = GetComponent<Transform>();
+        //컴포넌트 추출쓰~
+        animator = GetComponent<Animator>();
+        //이동을 제어하는 enemyMove 클래스 추출 
+        enemymove = GetComponent<Enemymove>();
+        //총 발사 추출 
+        enemyFire = GetComponent<EnemyFire>();
 
         cTime = new WaitForSeconds(0.3f);
     }
@@ -50,7 +65,8 @@ public class Enemy : MonoBehaviour
     {
         //CheckState코루틴 함수 실행
         StartCoroutine(CheckState());
-
+        //Action 코루틴 함수를 실행
+        StartCoroutine(Action());
     }
     // 에너미의 상태를 검사하는 코루틴함수 .
     IEnumerator CheckState()
@@ -80,22 +96,62 @@ public class Enemy : MonoBehaviour
             {
                 EnemyState = CurrentState.Idle;
             }
+
             // 코루틴 함수는 0.3초 간격으로 확인을 하기 때문에 
             yield return cTime;
 
         }
     }
 
+    IEnumerator Action()
+    {
+        // 적 캐릭터가 죽을 때 까지 무한 루프 스타트
+        while (!IsDie)
+        {
+            yield return cTime;
+
+            switch (EnemyState)
+            {
+                case CurrentState.Idle:
+                    // 총알 발사 정지
+                    enemyFire.isFire = false;
+                    //순찰모드
+                    enemymove.patrolling = true;
+                    break;
+                case CurrentState.Trace:
+                    //총알 발사 정지
+                    enemyFire.isFire = false;
+                    //주인공의 위치를 넘겨 추적 모드로 변경
+                    enemymove.traceTarget = PlayerTr.position;
+                    break;
+                case CurrentState.Attack:
+                    //순찰 및 추적을 정지하고 공격
+                    enemymove.Stop();
+                    //총알 발사 시작
+                    if(enemyFire.isFire == false)
+                    {
+                        enemyFire.isFire = true;
+                    }
+
+                    break;
+                case CurrentState.Die:
+                    //죽었을 때
+                    enemymove.Stop();
+                    break;
+            }
+        }
+    }
+
 
     void Start()
     {
-        rigidbody = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
+        //rigidbody = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
-
+        // Speed 파라미터에 이동 속도를 전달 
+        animator.SetFloat(hashSpeed, enemymove.speed);
         
     }
 }
