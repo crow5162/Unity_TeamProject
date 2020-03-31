@@ -31,8 +31,13 @@ public class PlayerControll : MonoBehaviour
     private readonly int hashH = Animator.StringToHash("h");
 
     [Header("Aiming Target")]
-    private bool isAiming = false;  //조준모드
-    private Transform followTr;
+    public float _targetRadius = 3.0f; //타겟검출 범위 지정
+    public Collider[] targets;
+    private bool isAiming = false;      //조준모드
+    private bool isLockTarget = false;  //타겟을 조준
+    private GameObject target;
+    private Quaternion targetRotation;
+    private FireControll fireControll;  
 
     // Start is called before the first frame update
     void Start()
@@ -41,86 +46,128 @@ public class PlayerControll : MonoBehaviour
         anim = GetComponent<Animator>();
         playerTr = GetComponent<Transform>();
 
-        cControll = GameObject.Find("Main Camera").GetComponent<CameraControll>();
-        followTr = transform.Find("CameraFollow").GetComponent<Transform>();
+        target = GameObject.FindWithTag("ENEMY");
+
+        fireControll = GetComponent<FireControll>();
+    }
+
+    Transform FindTargets()
+    {
+        float maxDist = _targetRadius;
+        Transform nearest = null;
+        targets = Physics.OverlapSphere(transform.position, _targetRadius);
+
+        foreach (Collider hit in targets)
+        {
+            if (hit && hit.tag == "ENEMY")
+            {
+                float dist = Vector3.Distance(transform.position, hit.transform.position);
+
+                if (dist < maxDist)
+                {
+                    maxDist = dist;
+                    nearest = hit.transform;
+                }
+            }
+        }
+
+        return nearest;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         Vector2 inputDir = input.normalized;
 
         //CharacterRotation
-        if(inputDir != Vector2.zero)
+        if (inputDir != Vector2.zero)
         {
-            if (!isAiming)
+            if (!isLockTarget)
             {
                 float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + cameraTr.eulerAngles.y;
                 transform.eulerAngles = Vector2.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
             }
         }
+
+        Vector3 moveDir = (Vector3.forward * input.y) + (Vector3.right * input.x);
         
-        bool running = Input.GetKey(KeyCode.LeftShift);
-        float speed = ((running) ? runSpeed : walkSpeed) * inputDir.magnitude;
+        float speed = ((isAiming) ? walkSpeed : runSpeed) * inputDir.magnitude;
         
         currentSpeed = Mathf.SmoothDamp(currentSpeed, speed, ref speedSmoothVelocity, speedSmoothTime);
         
         //이동처리
         //Aiming 상태가 아닐때에만 이동처리를 합니다.
-        if(!isAiming)
+        if(!isLockTarget)
         transform.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
-        
-        if(input.x == 0 && input.y == 0)
+        if (isLockTarget)
+        transform.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
+
+
+        //Aiming Animation OutPut
+        anim.SetFloat(hashH, input.x);
+        anim.SetFloat(hashV, input.y);
+
+        if (input.x == 0 && input.y == 0)
         {
             anim.SetBool(hashMoving, false);
         }
         else if (input.x != 0 || input.y != 0)
         {
-            if(!isAiming)
             anim.SetBool(hashMoving, true);
         }
         
         if(Input.GetMouseButton(1))
         {
             isAiming = true;
-            cControll._isZoomed = true;
+            fireControll.isAiming = true;
 
-            //Vector3.Lerp(transform.Find("CameraFollow").position, transform.Find("CameraFollow(Zoom)").position, 2.0f);
         }
         else if (Input.GetMouseButtonUp(1))
         {
             isAiming = false;
-            cControll._isZoomed = false;
-
+            isLockTarget = false;
+            fireControll.isAiming = false;
         }
 
-        Aiming(); 
+        Aiming();
+    }
+
+    private void LateUpdate()
+    {
+        
     }
 
     void Aiming()
     {
         if(isAiming)
         {
-            Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-            Vector2 inputDir = input.normalized;
 
-            //Aiming Animation OutPut
-            anim.SetFloat(hashV, Input.GetAxis("Vertical"));
-            anim.SetFloat(hashH, Input.GetAxis("Horizontal"));
+            Transform target = FindTargets();
 
-            float targetRotation = cameraTr.eulerAngles.y;
-            transform.eulerAngles = Vector2.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
+            if(target != null)
+            {
+                Vector3 autoAim = new Vector3(target.transform.position.x,
+                                              transform.position.y,
+                                              target.transform.position.z);
+                
+                playerTr.transform.LookAt(autoAim);
+                
+                isLockTarget = true;
+                
+            }
 
-            followTr.position = Vector3.Lerp(followTr.position,
-               transform.Find("CameraFollow(Zoom)").position, 0.05f);
-        }
-        else if(!isAiming)
-        {
-            followTr.position = Vector3.Lerp(followTr.position,
-              transform.Find("CameraFollow(noZoom)").position, 0.05f);
+            else if (target == null)
+            {
+                isLockTarget = false;
+            }   
         }
 
         anim.SetBool(hashAiming, isAiming);
+    }
+
+    void FootStep()
+    {
+
     }
 }

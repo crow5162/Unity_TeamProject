@@ -71,13 +71,13 @@ public class CameraControll : MonoBehaviour
         //Zoom 이 활성화 되어있냐에 따라 Follow타겟으로 잡을지 Zoom타겟으로 잡을지 결정.
         //transform.position = ((isZoom) ? zoomTarget.position : followTarget.position) - transform.forward * distFromTarget;
 
-        if(isZoom)
-        {
-            camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, zoomFOV, Time.deltaTime * smooth);
-        }
-        else if(!isZoom)
-        {
-            camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, normalFOV, Time.deltaTime * smooth);
-        }
+        //if(isZoom)
+        //{
+        //    camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, zoomFOV, Time.deltaTime * smooth);
+        //}
+        //else if(!isZoom)
+        //{
+        //    camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, normalFOV, Time.deltaTime * smooth);
+        //}
     }
 }
