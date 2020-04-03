@@ -32,15 +32,23 @@ public class Enemy : MonoBehaviour
     private Enemymove enemymove;
     //총알 발사를 제어하는 EnemyFire 클래스를 저장할 변수 
     private EnemyFire enemyFire;
-
+    //에너미 체력써야함
+    private EnemyDamage enemyDamage;
 
     //애니메이터 컨트롤러에 정의한 파라미터의 해시값을 미리 추출
     private readonly int hashMove = Animator.StringToHash("IsMove");
     private readonly int hashSpeed = Animator.StringToHash("Speed");
+    private readonly int hashDie = Animator.StringToHash("IsDie");
+    private readonly int hashOffset = Animator.StringToHash("Offset");
+    private readonly int hashWalkSpeed = Animator.StringToHash("WalkSpeed");
 
+
+  
     //한번만 호출되는 함수 
     void Awake()
     {
+
+
         //주인공의 게임 오브젝트를 추출 
         var player = GameObject.FindGameObjectWithTag("PLAYER");
         //주인공의 Transform 컴포넌트 추출 
@@ -56,8 +64,13 @@ public class Enemy : MonoBehaviour
         enemymove = GetComponent<Enemymove>();
         //총 발사 추출 
         enemyFire = GetComponent<EnemyFire>();
-
+        // 체력 추출
+        enemyDamage = GetComponent<EnemyDamage>();
+        // 코루틴 실행 지연되는시간. 
         cTime = new WaitForSeconds(0.3f);
+        // WalkSpeed / Offset 값 변경 
+        animator.SetFloat(hashOffset, Random.Range(0.0f, 1.0f));
+        animator.SetFloat(hashWalkSpeed, Random.Range(1.0f, 1.3f));
     }
 
     // 활성화가 될 때마다 호출되는 함수 (중요! 활성화 될 때!!!! 마다)
@@ -105,7 +118,7 @@ public class Enemy : MonoBehaviour
 
     IEnumerator Action()
     {
-        // 적 캐릭터가 죽을 때 까지 무한 루프 스타트
+        // 적이 죽을 때 까지 무한 루프 스타트
         while (!IsDie)
         {
             yield return cTime;
@@ -136,7 +149,11 @@ public class Enemy : MonoBehaviour
                     break;
                 case CurrentState.Die:
                     //죽었을 때
+                    IsDie = true;
+                    enemyFire.isFire = false;
                     enemymove.Stop();
+                    animator.SetTrigger(hashDie);
+                    GetComponent<BoxCollider>().enabled = false;
                     break;
             }
         }

@@ -12,6 +12,8 @@ public class Enemymove : MonoBehaviour
     public List<Transform> wayPoints;
     // 다음 순찰 지점 배열의 Index
     public int nextIdx;
+
+
     private readonly float patrolSpeed = 1.5f;
     private readonly float traceSpeed = 5.0f;
 
@@ -34,7 +36,7 @@ public class Enemymove : MonoBehaviour
             {
                 agent.speed = patrolSpeed;
                 //순찰 상태 회전
-                damping = 1.0f;
+                damping = 2.0f;
                 MoveWayPoint();
             }
         }
@@ -85,11 +87,12 @@ public class Enemymove : MonoBehaviour
             Box.GetComponentsInChildren<Transform>(wayPoints);
             //배열의 첫 번째 항목을 삭제  
             //삭제를 하지않으면 페어런트인 게임오브젝트 ( WayPointBox)도 순찰지점으로 들어감. 
-            //참고 하기
             wayPoints.RemoveAt(0);
-        }
 
-        //MoveWayPoint();
+            //첫번째로 이동할 위치르르 랜덤으로 설정 
+            nextIdx = Random.Range(0, wayPoints.Count);
+        }
+        // MoveWayPoint();
         this.patrolling = true;
     }
     // 다음 목적지 까지 이동 명령을 줄꺼임. 
@@ -97,14 +100,12 @@ public class Enemymove : MonoBehaviour
     {
         //최단 거리 경고 계산이 끝나지 않았으면 다음을 수행 하지 않음.
         if (agent.isPathStale) return;
-        {
-            // 다음 목적지를 waypoint 배열에서 추출한 위치로 다음  목적지를 지정 
-            agent.destination = wayPoints[nextIdx].position;
-            // 네비 기능을 활성화해서 이동을 시작함
-            agent.isStopped = false;
-        }
-
-
+        
+         // 다음 목적지를 waypoint 배열에서 추출한 위치로 다음  목적지를 지정 
+         agent.destination = wayPoints[nextIdx].position;
+         // 네비 기능을 활성화해서 이동을 시작함
+         agent.isStopped = false;
+        
     }
     // 주인공을 추적할 때 이동시키는 함수 
     void TraceTarget(Vector3 pos)
@@ -132,14 +133,15 @@ public class Enemymove : MonoBehaviour
             //보간 함수를 사용해 점진적으로 회전 시킴 
             enemyTr.rotation = Quaternion.Slerp(enemyTr.rotation, rot, Time.deltaTime * damping);
         }
-
+        //만약에 순찰 모드가 아니라면  이후로직을 실행하지 않음.
         if (!_patrolling) return;
 
         //NavmeshAgent 가 이동하고 있고 목적지에 도착했는지 여부를 계산 
         if(agent.velocity.sqrMagnitude >= 0.2f * 0.2f && agent.remainingDistance <= 0.5f)
         {
             //다음 목적지의 배열 첨자를 게산
-            nextIdx = ++nextIdx % wayPoints.Count;
+            //nextIdx = ++nextIdx % wayPoints.Count;
+            nextIdx = Random.Range(0, wayPoints.Count); 
             // 다음 목적지로 이동 명령을 수행
             MoveWayPoint();
         }
