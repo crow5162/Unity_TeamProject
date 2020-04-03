@@ -13,6 +13,9 @@ public class CameraControll : MonoBehaviour
     [Header("TargetDist Set")]
     public Vector2 pitchMinMax = new Vector2(-40, 85);
     public float distFromTarget = 2;
+
+    [Header("Camera Rotate")]
+    public float rotateSpeed = 10.0f;
     
     public float rotationSmoothTime = .12f;
     Vector3 rotationSmoothVelocity;
@@ -55,6 +58,12 @@ public class CameraControll : MonoBehaviour
         camera = GetComponent<Camera>();
     }
 
+    private void Update()
+    {
+        transform.Rotate(0, rotateSpeed * Time.deltaTime, 0);
+
+    }
+
     private void LateUpdate()
     {
         yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
@@ -78,6 +87,15 @@ public class CameraControll : MonoBehaviour
         //else if(!isZoom)
         //{
         //    camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, normalFOV, Time.deltaTime * smooth);
+        //}
+
+        //if(Input.GetKey(KeyCode.Q))
+        //{
+        //    transform.right 
+        //}
+        //else if (Input.GetKey(KeyCode.E))
+        //{
+        //
         //}
     }
 }

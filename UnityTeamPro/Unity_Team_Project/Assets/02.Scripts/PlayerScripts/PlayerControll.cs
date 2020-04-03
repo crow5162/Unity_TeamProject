@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerControll : MonoBehaviour
 {
+    [SerializeField]
+
+    Transform cameraPos;
     [Header("Character Speed")]
     public float walkSpeed = 2.0f;
     public float runSpeed = 6.0f;
@@ -83,7 +86,7 @@ public class PlayerControll : MonoBehaviour
         //CharacterRotation
         if (inputDir != Vector2.zero)
         {
-            if (!isLockTarget)
+            if (!isAiming)
             {
                 float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + cameraTr.eulerAngles.y;
                 transform.eulerAngles = Vector2.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
@@ -98,15 +101,21 @@ public class PlayerControll : MonoBehaviour
         
         //이동처리
         //Aiming 상태가 아닐때에만 이동처리를 합니다.
-        if(!isLockTarget)
-        transform.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
-        if (isLockTarget)
-        transform.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
-
+        if(!isAiming)
+        {
+            transform.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
+            cameraPos.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
+        }
+        if (isAiming)
+        {
+            //transform.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
+            //cameraPos.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
+        }
 
         //Aiming Animation OutPut
         anim.SetFloat(hashH, input.x);
         anim.SetFloat(hashV, input.y);
+
 
         if (input.x == 0 && input.y == 0)
         {
@@ -143,24 +152,97 @@ public class PlayerControll : MonoBehaviour
         if(isAiming)
         {
 
-            Transform target = FindTargets();
+            //Transform target = FindTargets();
+            //
+            //if(target != null)
+            //{
+            //    Vector3 autoAim = new Vector3(target.transform.position.x,
+            //                                  transform.position.y,
+            //                                  target.transform.position.z);
+            //
+            //
+            //    //float targetRotation = Mathf.Atan2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) * Mathf.Rad2Deg + target.eulerAngles.y;
+            //    //transform.eulerAngles = Vector2.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
+            //
+            //    playerTr.transform.LookAt(autoAim);
+            //
+            //    isLockTarget = true;
+            //    
+            //}
+            //
+            //else if (target == null)
+            //{
+            //    isLockTarget = false;
+            //}   
 
-            if(target != null)
+            float _horizontal = Input.GetAxisRaw("Horizontal");
+            float _vertical = Input.GetAxisRaw("Vertical");
+
+            Vector3 moveDir = (Vector3.forward * _vertical) + (Vector3.right * _horizontal);
+
+            Vector3 _movement = new Vector3(_horizontal, 0, _vertical);
+            _movement = _movement.normalized;
+
+            //transform.Translate(_movement * walkSpeed * Time.deltaTime, Space.Self);
+
+            transform.Translate(_movement * walkSpeed * Time.deltaTime, Space.World);
+
+
+
+            //if(Input.GetKey(KeyCode.W))
+            //{
+            //    transform.Translate(Vector3.forward * walkSpeed * Time.deltaTime);
+            //    //cameraPos.Translate(Vector3.forward * walkSpeed * Time.deltaTime);
+            //}
+            //if(Input.GetKey(KeyCode.S))
+            //{
+            //    transform.Translate(Vector3.back * walkSpeed * Time.deltaTime);
+            //    //cameraPos.Translate(Vector3.back * walkSpeed * Time.deltaTime);
+            //}
+            //if(Input.GetKey(KeyCode.A))
+            //{
+            //    transform.Translate(Vector3.left * walkSpeed * Time.deltaTime);
+            //    //cameraPos.Translate(Vector3.left * walkSpeed * Time.deltaTime);
+            //}
+            //if(Input.GetKey(KeyCode.D))
+            //{
+            //    transform.Translate(Vector3.right * walkSpeed * Time.deltaTime);
+            //    //cameraPos.Translate(Vector3.right * walkSpeed * Time.deltaTime);
+            //}
+
+            //cameraPos.Translate(_movement * walkSpeed * Time.deltaTime, Space.World);
+
+            //cameraPos.Translate(Vector3.right * walkSpeed * Time.deltaTime * _horizontal, Space.Self);
+            //cameraPos.Translate(Vector3.forward * walkSpeed * Time.deltaTime * _vertical, Space.Self);
+
+            //cameraPos.Translate();
+
+            //Vector3 newPos = new Vector3
+
+            //RaycastHit _hit;
+            //Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            //
+            //Physics.Raycast(_ray, out _hit);
+            //
+            //Vector3 lookMousePoint = new Vector3(_hit.point.x, transform.position.y, _hit.point.z);
+            //
+            // transform.LookAt(lookMousePoint);
+
+            Plane playerPlane = new Plane(Vector3.up, transform.position);
+            Ray ray = UnityEngine.Camera.main.ScreenPointToRay(Input.mousePosition);
+            float hitDist = 0.0f;
+
+            if(playerPlane.Raycast(ray, out hitDist))
             {
-                Vector3 autoAim = new Vector3(target.transform.position.x,
-                                              transform.position.y,
-                                              target.transform.position.z);
-                
-                playerTr.transform.LookAt(autoAim);
-                
-                isLockTarget = true;
-                
+                Vector3 targetPoint = ray.GetPoint(hitDist);
+                Quaternion targetRotation = Quaternion.LookRotation(targetPoint - transform.position);
+                targetRotation.x = 0;
+                targetRotation.z = 0;
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 7f * Time.deltaTime);
             }
 
-            else if (target == null)
-            {
-                isLockTarget = false;
-            }   
+            
+
         }
 
         anim.SetBool(hashAiming, isAiming);

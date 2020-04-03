@@ -57,7 +57,6 @@ public class FireControll : MonoBehaviour
         laserPointer = GetComponent<LineRenderer>();
         laserPointer.SetColors(Color.red, Color.yellow);
         laserPointer.SetWidth(0.025f, 0.025f);
-        //laserPointer.useWorldSpace = false;
         laserPointer.enabled = false;
 
         anim = GetComponent<Animator>();
@@ -65,53 +64,31 @@ public class FireControll : MonoBehaviour
 
     private void Update()
     {
+        //조준모드
         if (isAiming)
         {
-            //발사
-            //if (Input.GetMouseButtonDown(0))
-            //{
-            //    if (weaponType == WEAPONTYPE.SHOT_GUN)
-            //    {
-            //        ShotGunFire();
-            //        anim.SetTrigger(hashFire);
-            //    }
-            //    else if (weaponType == WEAPONTYPE.SNIPER_RIFLE)
-            //    {
-            //        SniperRifle();
-            //        anim.SetTrigger(hashFire);
-            //    }
-            //}
-
-            //else if (Input.GetMouseButton(0))
-            //{
-            //    if (weaponType == WEAPONTYPE.ASSULT_RIFLE)
-            //    {
-            //        rapidFire += Time.deltaTime;
-            //
-            //        if (rapidFire >= fireDelay)
-            //        {
-            //            BulletFire();
-            //            rapidFire = 0.0f;
-            //        }
-            //    }
-            //}
-
             if(weaponType == WEAPONTYPE.ASSULT_RIFLE)
             {
+                laserPointer.enabled = false;
+
                 if(Input.GetMouseButton(0))
                 {
                     rapidFire += Time.deltaTime;
-
+                
                     if(rapidFire >= fireDelay)
                     {
                         BulletFire();
                         rapidFire = 0.0f;
                     }
                 }
+
+
             }
 
             else if (weaponType == WEAPONTYPE.SHOT_GUN)
             {
+                laserPointer.enabled = false;
+
                 if(Input.GetMouseButtonDown(0))
                 {
                     ShotGunFire();
@@ -123,18 +100,24 @@ public class FireControll : MonoBehaviour
             {
                 RaycastHit[] hits;
 
+                //Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
                 hits = Physics.RaycastAll(firePos.position, firePos.forward, rayDistance);
+
+                laserPointer.enabled = true;
+                laserPointer.SetPosition(0, firePos.position);
+                laserPointer.SetPosition(1, firePos.forward * rayDistance);
 
                 for (int i = 0; i < hits.Length; i++)
                 {
                     RaycastHit hit = hits[i];
 
-                    Debug.DrawRay(firePos.position, firePos.forward * rayDistance);
+                    Debug.DrawRay(firePos.position, hit.point);
 
-                    laserPointer.enabled = true;
-                    laserPointer.SetPosition(0, firePos.position);
-                    laserPointer.SetPosition(1, hit.point + firePos.forward * rayDistance);
-
+                    //laserPointer.enabled = true;
+                    //laserPointer.SetPosition(0, firePos.position);
+                    //laserPointer.SetPosition(1, hit.point + firePos.forward * rayDistance);
+                    
                     if (Input.GetMouseButtonDown(0))
                     {
                         if (hit.collider.tag == "ENEMY")
@@ -142,15 +125,20 @@ public class FireControll : MonoBehaviour
                             object[] _infos = new object[2];
                             _infos[0] = hit.point;               //Ray에 맞은 위치값.
                             _infos[1] = sniperRifleDamage;       //Enemy 에 전달할 대미지 값.
-
+                    
                             hit.collider.gameObject.SendMessage("OnDamage",
                                 _infos,
                                 SendMessageOptions.DontRequireReceiver);
-
                         }
                     }
+
+
                 }
             }
+        }
+        if(!isAiming)
+        {
+            laserPointer.enabled = false;
         }
 
         //무기교체
@@ -168,57 +156,45 @@ public class FireControll : MonoBehaviour
         {
             weaponType = WEAPONTYPE.SNIPER_RIFLE;
         }
-
-        //스나이퍼 라이플 일 때 레이저 포인터 활성화 및 포지션셋
-        //if (weaponType == WEAPONTYPE.SNIPER_RIFLE)
-        //{
-        //    if (isAiming)
-        //    {
-        //        laserPointer.enabled = true;
-        //        laserPointer.SetPosition(0, firePos.position);
-        //        laserPointer.SetPosition(1, firePos.forward * rayDistance);
-        //    }
-        //    else if (!isAiming)
-        //    {
-        //        laserPointer.enabled = false;
-        //    }
-        //}
-        //else if(weaponType != WEAPONTYPE.SNIPER_RIFLE)
-        //{
-        //    laserPointer.enabled = false;
-        //}
-
-
     }
 
     void BulletFire()
     {
-        RaycastHit hit;
+        RaycastHit _hit;
+        
+        Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(firePos.position, firePos.forward, out hit, rayDistance))
-        {
-            GameObject bullet = Instantiate(bulletPrefabs, firePos.position, firePos.rotation) as GameObject;
+        //Vector3 bulletPoint = new Vector3(_hit.point.x, firePos.position.y, );
 
-            bullet.transform.LookAt(hit.point);
-            bullet.GetComponent<Rigidbody>().AddForce(bullet.transform.forward * bulletSpeed);
-            anim.SetTrigger(hashFire);
-        }
-        else
-        {
-            GameObject bullet = Instantiate(bulletPrefabs, firePos.position, firePos.rotation) as GameObject;
-            bullet.GetComponent<Rigidbody>().AddForce(bullet.transform.forward * bulletSpeed);
-            anim.SetTrigger(hashFire);
-        }
+        Physics.Raycast(_ray, out _hit);
+        
+        Vector3 bulletPoint = new Vector3(_hit.point.x, firePos.position.y, _hit.point.z);
+        
+        GameObject bullet = Instantiate(bulletPrefabs, firePos.position, firePos.rotation) as GameObject;
+        bullet.transform.LookAt(bulletPoint);
+        bullet.GetComponent<Rigidbody>().AddForce(bullet.transform.forward * bulletSpeed);
+        anim.SetTrigger(hashFire);
+        
+
     }
 
     void ShotGunFire()
     {
-        for (int i = 0; i < pelletCount; i++)
+        if(Input.GetMouseButtonDown(0))
         {
-            pellets[i] = Random.rotation;
-            GameObject shot = Instantiate(shotGunPrefabs, firePos.position, firePos.rotation) as GameObject;
-            shot.transform.rotation = Quaternion.RotateTowards(shot.transform.rotation, pellets[i], spreadAngle);
-            shot.GetComponent<Rigidbody>().AddForce(shot.transform.forward * shotGunBulletSpeed);
+            for (int i = 0; i < pelletCount; i++)
+            {
+                pellets[i] = Random.rotation;
+        
+                if(Input.GetMouseButtonDown(0))
+                {
+                    GameObject shot = Instantiate(shotGunPrefabs, firePos.position, firePos.rotation) as GameObject;
+                    shot.transform.rotation = Quaternion.RotateTowards(shot.transform.rotation, pellets[i], spreadAngle);
+                    shot.GetComponent<Rigidbody>().AddForce(shot.transform.forward * shotGunBulletSpeed);
+                }
+            }
+
+            anim.SetTrigger(hashFire);
         }
     }
 
@@ -227,8 +203,6 @@ public class FireControll : MonoBehaviour
         RaycastHit[] hits;
 
         hits = Physics.RaycastAll(firePos.position, firePos.forward, rayDistance);
-
-
 
         for(int i =0;i<hits.Length;i++)
         {
