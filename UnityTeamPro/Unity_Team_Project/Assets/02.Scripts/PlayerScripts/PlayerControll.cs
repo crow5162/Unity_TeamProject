@@ -12,6 +12,8 @@ public class PlayerControll : MonoBehaviour
     public float runSpeed = 6.0f;
     public float rotSpeed = 80.0f;
 
+    private float rollSpeed = 200.0f;
+
     private float r = 0.0f;
 
     public float turnSmoothTime = 0.2f;
@@ -27,20 +29,23 @@ public class PlayerControll : MonoBehaviour
     private Animator anim;
     private Transform playerTr;
     private CameraControll cControll;
+    private Rigidbody rb;
+    private bool isRoll = false;
 
     private readonly int hashMoving = Animator.StringToHash("isMove");
     private readonly int hashAiming = Animator.StringToHash("isAiming");
+    private readonly int hashRoll = Animator.StringToHash("Roll");
     private readonly int hashV = Animator.StringToHash("v");
     private readonly int hashH = Animator.StringToHash("h");
+    private readonly int hashDeath = Animator.StringToHash("isDead");
 
     [Header("Aiming Target")]
     public float _targetRadius = 3.0f; //타겟검출 범위 지정
     public Collider[] targets;
     private bool isAiming = false;      //조준모드
-    private bool isLockTarget = false;  //타겟을 조준
     private GameObject target;
     private Quaternion targetRotation;
-    private FireControll fireControll;  
+    private FireControll fireControll;
 
     // Start is called before the first frame update
     void Start()
@@ -52,8 +57,27 @@ public class PlayerControll : MonoBehaviour
         target = GameObject.FindWithTag("ENEMY");
 
         fireControll = GetComponent<FireControll>();
+        rb = GetComponent<Rigidbody>();
+
+        //Debug.Log("Debug Check !");
+
+        //Vector3 temp = new Vector3();
+        //temp.RandomValue();
+        //AnimationBehavior[] temp = anim.GetBehaviours<AnimationBehavior>();
+        //for(int i = 0; i < temp.Length; i ++)
+        //{
+        //    temp[i].Enter += Enter;
+        //}
     }
 
+    //private void Enter(AnimatorStateInfo stateInfo, int layerInde)
+    //{
+    //    if(stateInfo.IsName(""))
+    //    {
+
+    //    }
+        
+    //}
     Transform FindTargets()
     {
         float maxDist = _targetRadius;
@@ -86,7 +110,7 @@ public class PlayerControll : MonoBehaviour
         //CharacterRotation
         if (inputDir != Vector2.zero)
         {
-            if (!isAiming)
+            if (!isAiming && !isRoll)
             {
                 float targetRotation = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + cameraTr.eulerAngles.y;
                 transform.eulerAngles = Vector2.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
@@ -101,21 +125,18 @@ public class PlayerControll : MonoBehaviour
         
         //이동처리
         //Aiming 상태가 아닐때에만 이동처리를 합니다.
-        if(!isAiming)
+        if(!isAiming && !isRoll)
         {
             transform.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
             cameraPos.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
+
+
         }
         if (isAiming)
         {
             //transform.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
             //cameraPos.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
         }
-
-        //Aiming Animation OutPut
-        anim.SetFloat(hashH, input.x);
-        anim.SetFloat(hashV, input.y);
-
 
         if (input.x == 0 && input.y == 0)
         {
@@ -125,33 +146,48 @@ public class PlayerControll : MonoBehaviour
         {
             anim.SetBool(hashMoving, true);
         }
+
+        //Aiming Animation OutPut
+        anim.SetFloat(hashH, input.x);
+        anim.SetFloat(hashV, input.y);
+
         
         if(Input.GetMouseButton(1))
         {
             isAiming = true;
             fireControll.isAiming = true;
-
         }
         else if (Input.GetMouseButtonUp(1))
         {
             isAiming = false;
-            isLockTarget = false;
             fireControll.isAiming = false;
         }
 
         Aiming();
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            if(!isRoll)
+            {
+                StartCoroutine(this.RollAction());
+
+            }
+
+        }
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
-        
+        if(isRoll)
+        {
+            rb.AddForce(transform.forward * rollSpeed);
+        }
     }
 
     void Aiming()
     {
-        if(isAiming)
+        if(isAiming && !isRoll)
         {
-
             //Transform target = FindTargets();
             //
             //if(target != null)
@@ -240,16 +276,54 @@ public class PlayerControll : MonoBehaviour
                 targetRotation.z = 0;
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 7f * Time.deltaTime);
             }
-
-            
-
         }
 
         anim.SetBool(hashAiming, isAiming);
     }
 
+    IEnumerator RollAction()
+    {
+        anim.SetTrigger(hashRoll);
+
+        if (Input.GetButton("Horizontal") || Input.GetButton("Vertical"))
+        {
+            Vector3 nowforward = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized;
+
+            if (nowforward != Vector3.zero) transform.forward = nowforward;
+            transform.Translate(Vector3.forward * Time.deltaTime);
+        }
+
+        isRoll = true;
+        fireControll.isRoll = true;
+
+        yield return new WaitForSeconds(0.85f);
+
+        isRoll = false;
+        fireControll.isRoll = false;
+    }
+
+#region AnimationEvent
+
     void FootStep()
     {
 
     }
+
+    void RollSound()
+    {
+
+    }
+
+    void CantRotate()
+    {
+
+    }
+
+    void EndRoll()
+    {
+
+    }
+
+#endregion
+
 }

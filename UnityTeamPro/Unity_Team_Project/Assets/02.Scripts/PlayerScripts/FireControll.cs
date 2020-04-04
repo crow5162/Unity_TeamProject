@@ -18,6 +18,7 @@ public class FireControll : MonoBehaviour
     public GameObject shotGunPrefabs;                           //Shot gun Prefabs.
     public Transform firePos;                                   //총알 발사 위치
     public bool isAiming = false;                               //조준모드 
+    public bool isRoll = false;
 
     [Header("ASSULT RIFLE")]
     public float bulletSpeed = 3000.0f;                         //Bullet Speed
@@ -65,7 +66,7 @@ public class FireControll : MonoBehaviour
     private void Update()
     {
         //조준모드
-        if (isAiming)
+        if (isAiming && !isRoll)
         {
             if(weaponType == WEAPONTYPE.ASSULT_RIFLE)
             {
@@ -100,23 +101,17 @@ public class FireControll : MonoBehaviour
             {
                 RaycastHit[] hits;
 
-                //Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
                 hits = Physics.RaycastAll(firePos.position, firePos.forward, rayDistance);
-
-                laserPointer.enabled = true;
-                laserPointer.SetPosition(0, firePos.position);
-                laserPointer.SetPosition(1, firePos.forward * rayDistance);
 
                 for (int i = 0; i < hits.Length; i++)
                 {
                     RaycastHit hit = hits[i];
 
-                    Debug.DrawRay(firePos.position, hit.point);
+                    Debug.DrawRay(firePos.position, firePos.forward);
 
-                    //laserPointer.enabled = true;
-                    //laserPointer.SetPosition(0, firePos.position);
-                    //laserPointer.SetPosition(1, hit.point + firePos.forward * rayDistance);
+                    laserPointer.enabled = true;
+                    laserPointer.SetPosition(0, firePos.position);
+                    laserPointer.SetPosition(1, hit.point + firePos.forward * rayDistance);
                     
                     if (Input.GetMouseButtonDown(0))
                     {
@@ -131,8 +126,6 @@ public class FireControll : MonoBehaviour
                                 SendMessageOptions.DontRequireReceiver);
                         }
                     }
-
-
                 }
             }
         }
@@ -164,8 +157,6 @@ public class FireControll : MonoBehaviour
         
         Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        //Vector3 bulletPoint = new Vector3(_hit.point.x, firePos.position.y, );
-
         Physics.Raycast(_ray, out _hit);
         
         Vector3 bulletPoint = new Vector3(_hit.point.x, firePos.position.y, _hit.point.z);
@@ -174,8 +165,6 @@ public class FireControll : MonoBehaviour
         bullet.transform.LookAt(bulletPoint);
         bullet.GetComponent<Rigidbody>().AddForce(bullet.transform.forward * bulletSpeed);
         anim.SetTrigger(hashFire);
-        
-
     }
 
     void ShotGunFire()

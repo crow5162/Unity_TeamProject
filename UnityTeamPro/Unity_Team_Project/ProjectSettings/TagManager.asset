@@ -7,6 +7,7 @@ TagManager:
   - PLAYER
   - ENEMY
   - BULLET
+  - E_BULLET
   layers:
   - Default
   - TransparentFX
@@ -19,8 +20,8 @@ TagManager:
   - 
   - 
   - ENEMY
-  - 
-  - 
+  - ENEMYBULLET
+  - BULLET
   - 
   - 
   - 
