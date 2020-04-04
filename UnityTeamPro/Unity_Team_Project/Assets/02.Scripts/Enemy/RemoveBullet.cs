@@ -11,7 +11,7 @@ public class RemoveBullet : MonoBehaviour
     private void OnCollisionEnter(Collision coll)
     {
         //충돌한 게임 오브젝트의 태그값 비교 
-        if(coll.collider.tag == "BULLET")
+        if(coll.collider.tag == "E_BULLET")
         {
             //스파크 효과 함수 호출
             ShowEffect(coll);
@@ -28,6 +28,7 @@ public class RemoveBullet : MonoBehaviour
         //법선 벡터가 이루는 회전각도를 추출 
         Quaternion rot = Quaternion.FromToRotation(-Vector3.forward, contact.normal);
         //스파크 효과를 생성 
-        Instantiate(sparkEffect, contact.point, rot);
+        GameObject sp = Instantiate(sparkEffect, contact.point, rot);
+        Destroy(sp, 1.0f);
     }
 }

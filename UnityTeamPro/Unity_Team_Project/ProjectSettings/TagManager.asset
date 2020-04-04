@@ -4,10 +4,10 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Shootable
-  - ENEMY
   - PLAYER
+  - ENEMY
   - BULLET
+  - E_BULLET
   layers:
   - Default
   - TransparentFX
@@ -17,10 +17,10 @@ TagManager:
   - UI
   - 
   - 
-  - Lighting
-  - Ground
-  - Postprocessing
-  - Bullet
+  - 
+  - 
+  - ENEMY
+  - ENEMYBULLET
   - 
   - 
   - 
@@ -42,9 +42,6 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Fire
-    uniqueID: 3804908061
-    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
