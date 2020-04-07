@@ -24,7 +24,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ColorMask:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 703a963deb2de2448ba1315eb2001845, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -117,9 +117,9 @@ Material:
     - _DamageColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 1, g: 0.8924949, b: 0.6102941, a: 1}
     - _EmissiveColor: {r: 1, g: 1, b: 1, a: 1}
-    - _MaskedColorA: {r: 1, g: 0, b: 0, a: 1}
-    - _MaskedColorB: {r: 0, g: 1, b: 0, a: 1}
-    - _MaskedColorC: {r: 0, g: 0, b: 1, a: 1}
+    - _MaskedColorA: {r: 1, g: 1, b: 1, a: 1}
+    - _MaskedColorB: {r: 0, g: 0, b: 0, a: 1}
+    - _MaskedColorC: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.4338235, g: 0.78914815, b: 1, a: 0.39215687}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _UVScale: {r: 1, g: 1, b: 1, a: 1}
