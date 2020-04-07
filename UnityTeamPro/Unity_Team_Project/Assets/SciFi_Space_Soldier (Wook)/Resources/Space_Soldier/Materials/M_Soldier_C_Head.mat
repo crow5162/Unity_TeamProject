@@ -114,7 +114,7 @@ Material:
     - _EmissionColor: {r: 1, g: 0.8924949, b: 0.6102941, a: 1}
     - _EmissiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _MaskedColorA: {r: 0.42647058, g: 0.028222319, b: 0.028222319, a: 1}
-    - _MaskedColorB: {r: 0.284, g: 0.284, b: 0.284, a: 1}
+    - _MaskedColorB: {r: 0, g: 0, b: 0, a: 1}
     - _MaskedColorC: {r: 0, g: 0, b: 1, a: 1}
     - _OutlineColor: {r: 0.4338235, g: 0.78914815, b: 1, a: 0.39215687}
     - _UVScale: {r: 1, g: 1, b: 1, a: 1}
