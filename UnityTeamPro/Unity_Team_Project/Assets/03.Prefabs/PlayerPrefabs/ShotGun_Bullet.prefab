@@ -76,6 +76,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e476c31b7fa1b3f4892c5d900ef51a74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bulletType: 1
+  bulletDamage: 30
+  isCritical: 0
+  bulletEffect: {fileID: 5502511703446421517, guid: 2c2a88ecdf34bc04ba88fc70c8131cec,
+    type: 3}
 --- !u!1 &6751084718723769463
 GameObject:
   m_ObjectHideFlags: 0

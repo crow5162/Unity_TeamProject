@@ -32,6 +32,10 @@ public class PlayerControll : MonoBehaviour
     private Rigidbody rb;
     private bool isRoll = false;
 
+    [HideInInspector]
+    public bool isDead = false;
+    public Collider[] targets;
+
     private readonly int hashMoving = Animator.StringToHash("isMove");
     private readonly int hashAiming = Animator.StringToHash("isAiming");
     private readonly int hashRoll = Animator.StringToHash("Roll");
@@ -41,7 +45,6 @@ public class PlayerControll : MonoBehaviour
 
     [Header("Aiming Target")]
     public float _targetRadius = 3.0f; //타겟검출 범위 지정
-    public Collider[] targets;
     private bool isAiming = false;      //조준모드
     private GameObject target;
     private Quaternion targetRotation;
@@ -58,26 +61,8 @@ public class PlayerControll : MonoBehaviour
 
         fireControll = GetComponent<FireControll>();
         rb = GetComponent<Rigidbody>();
-
-        //Debug.Log("Debug Check !");
-
-        //Vector3 temp = new Vector3();
-        //temp.RandomValue();
-        //AnimationBehavior[] temp = anim.GetBehaviours<AnimationBehavior>();
-        //for(int i = 0; i < temp.Length; i ++)
-        //{
-        //    temp[i].Enter += Enter;
-        //}
     }
 
-    //private void Enter(AnimatorStateInfo stateInfo, int layerInde)
-    //{
-    //    if(stateInfo.IsName(""))
-    //    {
-
-    //    }
-        
-    //}
     Transform FindTargets()
     {
         float maxDist = _targetRadius;
@@ -104,6 +89,8 @@ public class PlayerControll : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(isDead) return;
+
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         Vector2 inputDir = input.normalized;
 
@@ -129,13 +116,6 @@ public class PlayerControll : MonoBehaviour
         {
             transform.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
             cameraPos.Translate(transform.forward * currentSpeed * Time.deltaTime, Space.World);
-
-
-        }
-        if (isAiming)
-        {
-            //transform.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
-            //cameraPos.Translate(moveDir.normalized * speed * Time.deltaTime, Space.World);
         }
 
         if (input.x == 0 && input.y == 0)
@@ -223,47 +203,6 @@ public class PlayerControll : MonoBehaviour
 
             transform.Translate(_movement * walkSpeed * Time.deltaTime, Space.World);
 
-
-
-            //if(Input.GetKey(KeyCode.W))
-            //{
-            //    transform.Translate(Vector3.forward * walkSpeed * Time.deltaTime);
-            //    //cameraPos.Translate(Vector3.forward * walkSpeed * Time.deltaTime);
-            //}
-            //if(Input.GetKey(KeyCode.S))
-            //{
-            //    transform.Translate(Vector3.back * walkSpeed * Time.deltaTime);
-            //    //cameraPos.Translate(Vector3.back * walkSpeed * Time.deltaTime);
-            //}
-            //if(Input.GetKey(KeyCode.A))
-            //{
-            //    transform.Translate(Vector3.left * walkSpeed * Time.deltaTime);
-            //    //cameraPos.Translate(Vector3.left * walkSpeed * Time.deltaTime);
-            //}
-            //if(Input.GetKey(KeyCode.D))
-            //{
-            //    transform.Translate(Vector3.right * walkSpeed * Time.deltaTime);
-            //    //cameraPos.Translate(Vector3.right * walkSpeed * Time.deltaTime);
-            //}
-
-            //cameraPos.Translate(_movement * walkSpeed * Time.deltaTime, Space.World);
-
-            //cameraPos.Translate(Vector3.right * walkSpeed * Time.deltaTime * _horizontal, Space.Self);
-            //cameraPos.Translate(Vector3.forward * walkSpeed * Time.deltaTime * _vertical, Space.Self);
-
-            //cameraPos.Translate();
-
-            //Vector3 newPos = new Vector3
-
-            //RaycastHit _hit;
-            //Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            //
-            //Physics.Raycast(_ray, out _hit);
-            //
-            //Vector3 lookMousePoint = new Vector3(_hit.point.x, transform.position.y, _hit.point.z);
-            //
-            // transform.LookAt(lookMousePoint);
-
             Plane playerPlane = new Plane(Vector3.up, transform.position);
             Ray ray = UnityEngine.Camera.main.ScreenPointToRay(Input.mousePosition);
             float hitDist = 0.0f;
@@ -306,22 +245,22 @@ public class PlayerControll : MonoBehaviour
 
     void FootStep()
     {
-
+    
     }
-
+    
     void RollSound()
     {
-
+    
     }
-
+    
     void CantRotate()
     {
-
+    
     }
-
+    
     void EndRoll()
     {
-
+    
     }
 
 #endregion
