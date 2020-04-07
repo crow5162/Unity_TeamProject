@@ -547,8 +547,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06c411ef65c54da4b84a371b4790869e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 150
-  isDie: 0
+  hpBarPrefab: {fileID: 0}
+  hpBarOffset: {x: 0, y: 2.2, z: 0}
 --- !u!114 &3651610886614764998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,7 +595,7 @@ MonoBehaviour:
   isFire: 0
   fireSfx: {fileID: 8300000, guid: 98719b86f94ae7243880d806c1fbede7, type: 3}
   reloadSfx: {fileID: 8300000, guid: c3f2d990398999d419bb50bc83d2b78b, type: 3}
-  Bullet: {fileID: 213439548930257351, guid: 4176e54851857994e8ba2610a99b22a3, type: 3}
+  Bullet: {fileID: 6892558242018152894, guid: 4176e54851857994e8ba2610a99b22a3, type: 3}
   firePos: {fileID: 3651610886175180300}
 --- !u!1 &6399776969151925397
 GameObject:

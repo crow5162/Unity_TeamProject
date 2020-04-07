@@ -98,6 +98,8 @@ public class FireControll : MonoBehaviour
 
             if(weaponType == WEAPONTYPE.ASSULT_RIFLE)
             {
+                laserPointer.enabled = false;
+
                 if(Input.GetMouseButton(0))
                 {
                     rapidFire += Time.deltaTime;
@@ -112,6 +114,8 @@ public class FireControll : MonoBehaviour
 
             else if (weaponType == WEAPONTYPE.SHOT_GUN)
             {
+                laserPointer.enabled = false;
+
                 if(Input.GetMouseButtonDown(0))
                 {
                     ShotGunFire();
@@ -151,6 +155,11 @@ public class FireControll : MonoBehaviour
                     }
                 }
             }
+        }
+
+        else if (!isAiming)
+        {
+            laserPointer.enabled = false;
         }
 
         //무기교체

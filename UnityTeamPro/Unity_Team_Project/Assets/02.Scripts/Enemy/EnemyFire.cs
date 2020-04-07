@@ -79,7 +79,9 @@ public class EnemyFire : MonoBehaviour
 
     void Fire()
     {
+        //애니메이터
         animator.SetTrigger(hashFire);
+        //오디오 사운드 
         audio.PlayOneShot(fireSfx, 1.0f);
         //총알 생성 
         GameObject _bullet = Instantiate(Bullet, firePos.position, firePos.rotation);
